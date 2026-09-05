@@ -1,0 +1,67 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: graphtriage-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  neo4j:
+    image: neo4j:5.20-community
+    container_name: graphtriage-neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH}
+    ports:
+      - "7474:7474"   # Neo4j Browser (HTTP)
+      - "7687:7687"   # Bolt protocol
+    volumes:
+      - neo4j-data:/data
+
+  ticketing-service:
+    build:
+      context: ./ticketing-service
+    container_name: graphtriage-ticketing-service
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      INFERENCE_SERVICE_URL: http://inference-service:8000
+    ports:
+      - "${SPRING_PORT:-8080}:8080"
+
+  inference-service:
+    build:
+      context: ./inference-service
+    container_name: graphtriage-inference-service
+    restart: unless-stopped
+    environment:
+      NEO4J_URI: ${NEO4J_URI}
+      NEO4J_USER: ${NEO4J_USER}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+    ports:
+      - "${INFERENCE_PORT:-8000}:8000"
+    depends_on:
+      - neo4j
+
+volumes:
+  mysql-data:
+  neo4j-data:

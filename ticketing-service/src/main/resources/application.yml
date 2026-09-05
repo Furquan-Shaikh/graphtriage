@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ticketing-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/graphtriage}
+    username: ${SPRING_DATASOURCE_USERNAME:graphtriage_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:changeme_user}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # 'update' is convenient for Day 1-9 development.
+      # Switch to 'validate' + proper migrations (e.g. Flyway) before anything resembling production use.
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+# Custom app properties
+inference:
+  service:
+    url: ${INFERENCE_SERVICE_URL:http://localhost:8000}
+
+jwt:
+  secret: ${JWT_SECRET:dev-only-secret-change-me}
+  expiration-ms: 3600000

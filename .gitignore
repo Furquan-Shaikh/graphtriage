@@ -1,0 +1,36 @@
+# Environment
+.env
+
+# Java / Maven
+ticketing-service/target/
+ticketing-service/*.log
+*.class
+
+# Python
+inference-service/__pycache__/
+inference-service/**/__pycache__/
+inference-service/.venv/
+inference-service/venv/
+inference-service/*.egg-info/
+*.pyc
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (avoid committing large/raw datasets by default)
+data/*.csv
+data/*.json
+!data/.gitkeep
+
+# Neo4j / MySQL local volumes
+neo4j-data/
+mysql-data/
+
+# Notebooks checkpoints
+notebooks/.ipynb_checkpoints/
