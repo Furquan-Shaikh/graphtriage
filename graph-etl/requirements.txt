@@ -1,0 +1,4 @@
+# Used across all graph-etl scripts (Day 3 onward)
+neo4j==5.21.0
+mysql-connector-python==9.0.0
+python-dotenv==1.0.1

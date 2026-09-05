@@ -35,7 +35,7 @@ If the goal is to get a **working, hosted prototype ready for the mentor** quick
 |---|---|---|---|---|
 | Day 1 | Environment & repo setup | Phase 0 (setup part only; literature review deferred) | Repo live, containers running | ✅ Done |
 | Day 2 | Dataset creation | Phase 1 | Labeled synthetic dataset in MySQL | ✅ Done |
-| Day 3 | Knowledge graph construction | Phase 2 | Populated Neo4j graph | |
+| Day 3 | Knowledge graph construction | Phase 2 | Populated Neo4j graph | ✅ Done |
 | Day 4 | Embeddings + baseline model | Phase 3 + Phase 4 | Embeddings ready, baseline metrics recorded | |
 | Day 5 | GNN model | Phase 5 (lightweight version — no full hyperparameter search) | Trained GNN, compared to baseline | |
 | Day 6 | Explainability | Phase 6 (simplified version) | Explanation module returning readable output | |
@@ -81,19 +81,19 @@ If the goal is to get a **working, hosted prototype ready for the mentor** quick
 
 ---
 
-## Phase 2 — Knowledge Graph Design & Construction (Weeks 7–9) — *Sprint: Day 3*
+## Phase 2 — Knowledge Graph Design & Construction (Weeks 7–9) — *Sprint: Day 3* — ✅ Complete
 
 **Goals:** Build the graph backbone of the system.
 
 **Tasks:**
-- [ ] Implement graph schema from `design.md` in Neo4j.
-- [ ] Write ETL scripts to populate the graph from MySQL data.
-- [ ] Validate graph correctness (spot-check relationships via Cypher queries).
-- [ ] Visualize a sample subgraph to confirm it makes structural sense.
+- [x] Implement graph schema from `design.md` in Neo4j. — `graph-etl/schema_constraints.cypher` + `setup_constraints.py`.
+- [x] Write ETL scripts to populate the graph from MySQL data. — `graph-etl/sync_to_graph.py`.
+- [x] Validate graph correctness (spot-check relationships via Cypher queries). — `graph-etl/validate_graph.py`, all counts matched.
+- [x] Visualize a sample subgraph to confirm it makes structural sense. — Confirmed visually in Neo4j Browser (Ticket->Service, Ticket->Bug->Fix chains).
 
-**Deliverables:** Populated Neo4j graph reflecting the full dataset.
+**Deliverables:** Populated Neo4j graph reflecting the full dataset. — ✅ 5 Service, 1200 Ticket, 1200 Bug, 1200 Fix nodes; 1200 each of RAISED_ON/CAUSED_BY/FIXED_BY relationships.
 
-**Exit Criteria:** Graph queries return expected relationships (e.g., a ticket correctly links to its service and eventual fix).
+**Exit Criteria:** Graph queries return expected relationships (e.g., a ticket correctly links to its service and eventual fix). — ✅ Met on Sprint Day 3.
 
 ---
 

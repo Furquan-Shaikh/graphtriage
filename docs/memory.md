@@ -21,7 +21,7 @@ This is the **living memory** of the project — a running log of decisions, sta
 | Project Name | GraphTriage |
 | Domain | AIOps / Software Engineering + AI |
 | Core Idea | Knowledge-graph based explainable ticket triage and root-cause linking |
-| Current Phase | Phase 2 — Knowledge Graph Design & Construction (see `phases.md`) — Phase 0 & Phase 1 / Sprint Days 1-2 complete |
+| Current Phase | Phase 3 — NLP Embedding Pipeline (see `phases.md`) — Phase 0, 1 & 2 / Sprint Days 1-3 complete |
 | Target Outcome | Working prototype + thesis + paper submission to a Scopus/SCI-indexed venue |
 | Plagiarism Target | Below 30% on final report |
 
@@ -109,6 +109,7 @@ ticket ID belongs to.
 | Project kickoff | PRD, architecture, rules, phases, and design documents created and approved as the project foundation |
 | Sprint Day 1 | Repo scaffolded and pushed to GitHub; Docker Compose stack (MySQL, Neo4j, ticketing-service, inference-service) verified healthy end-to-end after fixing a MySQL host-port conflict (see Section 3) |
 | Sprint Day 2 | Synthetic dataset generated (1200 tickets, 5 services, 13 root-cause categories), stratified 70/15/15 train/val/test split, loaded into MySQL (with new `dataset_split` column, see Section 3), and documented via `data/generated/dataset_report.md` |
+| Sprint Day 3 | Knowledge graph built in Neo4j: constraints/indexes applied, Service/Ticket/Bug/Fix nodes synced from MySQL via `graph-etl/sync_to_graph.py`, validated (all MySQL-vs-Neo4j counts matched: 5 services, 1200 tickets/bugs/fixes, 1200 of each relationship type), and visually confirmed in Neo4j Browser |
 
 *(Append one line per significant milestone — e.g., "Phase 2 complete: knowledge graph populated with 1,200 tickets.")*
 
