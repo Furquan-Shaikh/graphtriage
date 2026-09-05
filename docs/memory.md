@@ -21,7 +21,7 @@ This is the **living memory** of the project — a running log of decisions, sta
 | Project Name | GraphTriage |
 | Domain | AIOps / Software Engineering + AI |
 | Core Idea | Knowledge-graph based explainable ticket triage and root-cause linking |
-| Current Phase | Phase 0 — Setup & Literature Review (see `phases.md`) |
+| Current Phase | Phase 1 — Dataset Acquisition & Preparation (see `phases.md`) — Phase 0 / Sprint Day 1 complete |
 | Target Outcome | Working prototype + thesis + paper submission to a Scopus/SCI-indexed venue |
 | Plagiarism Target | Below 30% on final report |
 
@@ -60,6 +60,27 @@ Alternatives Considered: SecuGuard (strong niche but narrower scope), SelfHeal-R
 
 *(Add new decision entries below this line as the project proceeds — e.g., dataset choice, GNN architecture choice, any scope change.)*
 
+```
+### Decision: Changed MySQL host port from 3306 to 3307 in docker-compose.yml
+Date: Sprint Day 1
+Context: On first `docker compose up`, the MySQL container failed to start with a
+port-bind error ("ports are not available: ... 0.0.0.0:3306"). This is a common
+Windows issue where a locally installed MySQL service (or XAMPP/WAMP) already
+occupies port 3306 on the host machine.
+Decision: Changed the host-side port mapping for the mysql service to "3307:3306"
+in docker-compose.yml, while keeping the container-internal port at 3306.
+Rationale: The ticketing-service connects to MySQL internally via the Docker
+network using the hostname "mysql" and port 3306 (see SPRING_DATASOURCE_URL in
+docker-compose.yml), so this change has zero effect on inter-service
+communication — it only changes how the database is reached from the host
+machine (e.g., via a local MySQL client/Workbench, now on port 3307).
+Alternatives Considered: Manually stopping the conflicting local MySQL service
+via Windows Services — rejected as the default fix since it requires admin
+access and could affect other local projects that depend on that local MySQL
+instance.
+```
+
+
 ---
 
 ## 4. Changelog
@@ -67,6 +88,7 @@ Alternatives Considered: SecuGuard (strong niche but narrower scope), SelfHeal-R
 | Date | Change |
 |---|---|
 | Project kickoff | PRD, architecture, rules, phases, and design documents created and approved as the project foundation |
+| Sprint Day 1 | Repo scaffolded and pushed to GitHub; Docker Compose stack (MySQL, Neo4j, ticketing-service, inference-service) verified healthy end-to-end after fixing a MySQL host-port conflict (see Section 3) |
 
 *(Append one line per significant milestone — e.g., "Phase 2 complete: knowledge graph populated with 1,200 tickets.")*
 

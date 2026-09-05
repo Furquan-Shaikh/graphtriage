@@ -197,6 +197,8 @@ services:
 
 All services run on a local Docker network; the Spring Boot service calls the inference service over internal HTTP (e.g., `http://inference-service:8000`).
 
+> **Note (added Sprint Day 1):** On the host machine, MySQL is exposed on port **3307** (not the default 3306), mapped to the container's internal 3306 — this avoids a common conflict with a pre-existing local MySQL installation on Windows. This only affects host-side access (e.g., a local MySQL client); internal service-to-service communication is unaffected since it uses the Docker network hostname `mysql:3306`. See `memory.md` Section 3 for the full decision record.
+
 ---
 
 ## 9. Scalability & Performance Considerations

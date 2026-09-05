@@ -31,37 +31,37 @@ If the goal is to get a **working, hosted prototype ready for the mentor** quick
 
 **Important scope note:** This sprint compresses the *build* phases only (Phase 0 through Phase 8). **Phase 9 (Evaluation & Benchmarking), Phase 10 (Paper & Thesis Writing), and Phase 11 (Final Submission)** are not part of this sprint — they happen after the prototype is live, and their duration depends on the journal's review process, not on build speed. Deep literature review (part of Phase 0) and full hyperparameter tuning (part of Phase 5) are also intentionally lightened during the sprint and should be revisited properly before Phase 10.
 
-| Sprint Day | Sprint Focus | Corresponding Phase(s) | Deliverable |
-|---|---|---|---|
-| Day 1 | Environment & repo setup | Phase 0 (setup part only; literature review deferred) | Repo live, containers running |
-| Day 2 | Dataset creation | Phase 1 | Labeled synthetic dataset in MySQL |
-| Day 3 | Knowledge graph construction | Phase 2 | Populated Neo4j graph |
-| Day 4 | Embeddings + baseline model | Phase 3 + Phase 4 | Embeddings ready, baseline metrics recorded |
-| Day 5 | GNN model | Phase 5 (lightweight version — no full hyperparameter search) | Trained GNN, compared to baseline |
-| Day 6 | Explainability | Phase 6 (simplified version) | Explanation module returning readable output |
-| Day 7 | Backend integration (API) | Phase 7 | End-to-end API working locally |
-| Day 8 | Dashboard | Phase 8 | Working local demo UI |
-| Day 9 | Dockerize + full local test | Phase 7 (hardening/testing tasks) | Fully working local system via Docker Compose |
-| Day 10 | Hosting + demo prep | Not a separate phase — deployment of Phase 7/8 output | Live hosted system, demo script ready |
+| Sprint Day | Sprint Focus | Corresponding Phase(s) | Deliverable | Status |
+|---|---|---|---|---|
+| Day 1 | Environment & repo setup | Phase 0 (setup part only; literature review deferred) | Repo live, containers running | ✅ Done |
+| Day 2 | Dataset creation | Phase 1 | Labeled synthetic dataset in MySQL | |
+| Day 3 | Knowledge graph construction | Phase 2 | Populated Neo4j graph | |
+| Day 4 | Embeddings + baseline model | Phase 3 + Phase 4 | Embeddings ready, baseline metrics recorded | |
+| Day 5 | GNN model | Phase 5 (lightweight version — no full hyperparameter search) | Trained GNN, compared to baseline | |
+| Day 6 | Explainability | Phase 6 (simplified version) | Explanation module returning readable output | |
+| Day 7 | Backend integration (API) | Phase 7 | End-to-end API working locally | |
+| Day 8 | Dashboard | Phase 8 | Working local demo UI | |
+| Day 9 | Dockerize + full local test | Phase 7 (hardening/testing tasks) | Fully working local system via Docker Compose | |
+| Day 10 | Hosting + demo prep | Not a separate phase — deployment of Phase 7/8 output | Live hosted system, demo script ready | |
 
 **After Day 10:** resume the full timeline at **Phase 9 (Evaluation & Benchmarking)** — the sprint gives you a working system, but the rigorous evaluation, full literature review, and paper/thesis writing (Phases 9–11) still need their own dedicated time before targeting a reputed journal.
 
 ---
 
-## Phase 0 — Setup & Literature Review (Weeks 1–3) — *Sprint: Day 1*
+## Phase 0 — Setup & Literature Review (Weeks 1–3) — *Sprint: Day 1* — ✅ Setup Complete
 
 **Goals:** Establish project foundation and confirm novelty against existing literature.
 
 **Tasks:**
 - [ ] Finalize and get mentor sign-off on `prd.md`.
-- [ ] Set up Git repository with structure from `rules.md` Section 2.
-- [ ] Set up local dev environment (Java 17, Python 3.10+, Docker, Neo4j, MySQL).
+- [x] Set up Git repository with structure from `rules.md` Section 2.
+- [x] Set up local dev environment (Java 17, Python 3.10+, Docker, Neo4j, MySQL).
 - [ ] Conduct literature review: AIOps ticket triage, knowledge-graph applications in software engineering, GNNs for software systems.
 - [ ] Identify 15–25 relevant papers; summarize each in your own words (avoid plagiarism from the start).
 
 **Deliverables:** Approved PRD, initial literature review draft, working local dev environment.
 
-**Exit Criteria:** Mentor approves scope; dev environment runs a "hello world" Spring Boot + Neo4j + Python FastAPI stack together via Docker Compose.
+**Exit Criteria:** Mentor approves scope; dev environment runs a "hello world" Spring Boot + Neo4j + Python FastAPI stack together via Docker Compose. — ✅ **Dev environment exit criteria met on Sprint Day 1** (repo on GitHub, all 4 containers healthy, both health endpoints returning UP). Literature review tasks remain open and should continue in parallel with the following sprint days, per `phases.md` original Phase 0 scope.
 
 ---
 
