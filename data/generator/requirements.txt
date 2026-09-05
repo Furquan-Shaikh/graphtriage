@@ -1,0 +1,4 @@
+# Only load_to_mysql.py needs these — generate.py and split_dataset.py use
+# only the Python standard library.
+mysql-connector-python==9.0.0
+python-dotenv==1.0.1

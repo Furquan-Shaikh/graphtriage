@@ -32,6 +32,7 @@ CREATE TABLE ticket (
     priority VARCHAR(20),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     resolved_at DATETIME NULL,
+    dataset_split VARCHAR(10) DEFAULT NULL, -- 'train' / 'val' / 'test' (added Sprint Day 2)
     FOREIGN KEY (service_id) REFERENCES service(id),
     FOREIGN KEY (component_id) REFERENCES component(id)
 );

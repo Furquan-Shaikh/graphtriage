@@ -34,7 +34,7 @@ If the goal is to get a **working, hosted prototype ready for the mentor** quick
 | Sprint Day | Sprint Focus | Corresponding Phase(s) | Deliverable | Status |
 |---|---|---|---|---|
 | Day 1 | Environment & repo setup | Phase 0 (setup part only; literature review deferred) | Repo live, containers running | ✅ Done |
-| Day 2 | Dataset creation | Phase 1 | Labeled synthetic dataset in MySQL | |
+| Day 2 | Dataset creation | Phase 1 | Labeled synthetic dataset in MySQL | ✅ Done |
 | Day 3 | Knowledge graph construction | Phase 2 | Populated Neo4j graph | |
 | Day 4 | Embeddings + baseline model | Phase 3 + Phase 4 | Embeddings ready, baseline metrics recorded | |
 | Day 5 | GNN model | Phase 5 (lightweight version — no full hyperparameter search) | Trained GNN, compared to baseline | |
@@ -65,20 +65,19 @@ If the goal is to get a **working, hosted prototype ready for the mentor** quick
 
 ---
 
-## Phase 1 — Dataset Acquisition & Preparation (Weeks 4–6) — *Sprint: Day 2*
+## Phase 1 — Dataset Acquisition & Preparation (Weeks 4–6) — *Sprint: Day 2* — ✅ Complete
 
 **Goals:** Secure a usable, labeled dataset (Option A or B from `prd.md` Section 9).
 
 **Tasks:**
-- [ ] Decide between internal/real dataset (Option A) vs. public/synthetic dataset (Option B).
-- [ ] If Option A: obtain access, anonymize sensitive fields.
-- [ ] If Option B: source public issue-tracker data or build a synthetic ticket generator.
-- [ ] Clean data: remove duplicates, handle missing fields, normalize text.
-- [ ] Define train/validation/test splits.
+- [x] Decide between internal/real dataset (Option A) vs. public/synthetic dataset (Option B). — Chose Option B (synthetic).
+- [x] If Option B: source public issue-tracker data or build a synthetic ticket generator. — Built `data/generator/generate.py`.
+- [x] Clean data: remove duplicates, handle missing fields, normalize text. — Not applicable in the same sense as real-world data since the generator produces well-formed records by construction; no cleaning step was needed.
+- [x] Define train/validation/test splits. — Stratified 70/15/15 split via `data/generator/split_dataset.py`.
 
-**Deliverables:** Cleaned dataset with documented schema and provenance.
+**Deliverables:** Cleaned dataset with documented schema and provenance. — ✅ `data/generated/dataset_report.md`.
 
-**Exit Criteria:** Dataset loaded into MySQL; basic descriptive statistics (ticket counts, class balance, etc.) documented.
+**Exit Criteria:** Dataset loaded into MySQL; basic descriptive statistics (ticket counts, class balance, etc.) documented. — ✅ Met on Sprint Day 2 (1200 tickets loaded; see `data/generated/dataset_report.md`).
 
 ---
 

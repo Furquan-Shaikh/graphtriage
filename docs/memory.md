@@ -21,7 +21,7 @@ This is the **living memory** of the project — a running log of decisions, sta
 | Project Name | GraphTriage |
 | Domain | AIOps / Software Engineering + AI |
 | Core Idea | Knowledge-graph based explainable ticket triage and root-cause linking |
-| Current Phase | Phase 1 — Dataset Acquisition & Preparation (see `phases.md`) — Phase 0 / Sprint Day 1 complete |
+| Current Phase | Phase 2 — Knowledge Graph Design & Construction (see `phases.md`) — Phase 0 & Phase 1 / Sprint Days 1-2 complete |
 | Target Outcome | Working prototype + thesis + paper submission to a Scopus/SCI-indexed venue |
 | Plagiarism Target | Below 30% on final report |
 
@@ -80,6 +80,25 @@ access and could affect other local projects that depend on that local MySQL
 instance.
 ```
 
+```
+### Decision: Added a `dataset_split` column to the `ticket` table
+Date: Sprint Day 2
+Context: The synthetic dataset (generate.py) is divided into train/val/test
+(split_dataset.py, stratified by root-cause category), but the original
+design.md schema had no way to record which split a loaded ticket belongs to.
+Decision: Added `dataset_split VARCHAR(10) DEFAULT NULL` to the `ticket` table
+(see data/generator/schema.sql), storing 'train' / 'val' / 'test'.
+Rationale: Model training (Day 5) and final evaluation (Day 9) both need to
+reliably pull the correct subset of tickets from MySQL/the knowledge graph.
+Storing the split as a column is simpler and less error-prone than
+re-deriving it later from separate CSV files once everything lives in MySQL.
+design.md Section 1 has been updated to match this schema.
+Alternatives Considered: Keeping split membership only in the CSV files —
+rejected because once data is loaded into MySQL and later synced into Neo4j
+(Day 3), there would be no reliable way to look up which split a given
+ticket ID belongs to.
+```
+
 
 ---
 
@@ -89,6 +108,7 @@ instance.
 |---|---|
 | Project kickoff | PRD, architecture, rules, phases, and design documents created and approved as the project foundation |
 | Sprint Day 1 | Repo scaffolded and pushed to GitHub; Docker Compose stack (MySQL, Neo4j, ticketing-service, inference-service) verified healthy end-to-end after fixing a MySQL host-port conflict (see Section 3) |
+| Sprint Day 2 | Synthetic dataset generated (1200 tickets, 5 services, 13 root-cause categories), stratified 70/15/15 train/val/test split, loaded into MySQL (with new `dataset_split` column, see Section 3), and documented via `data/generated/dataset_report.md` |
 
 *(Append one line per significant milestone — e.g., "Phase 2 complete: knowledge graph populated with 1,200 tickets.")*
 
