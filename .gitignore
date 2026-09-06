@@ -23,9 +23,16 @@ inference-service/*.egg-info/
 .DS_Store
 Thumbs.db
 
-# Data (avoid committing large/raw datasets by default)
-data/*.csv
-data/*.json
+# Data — ignore large/regenerable raw files and binaries (these are
+# reproducible by re-running the relevant script), but KEEP the .md report
+# files that get written alongside them (dataset_report.md, baseline_report.md,
+# gnn_vs_baseline_report.md, explainability_samples.md, etc.) — those are
+# real documented results, not just regenerable intermediate data.
+data/generated/*.csv
+data/generated/*.npz
+data/generated/*.pt
+data/generated/*.joblib
+data/generated/*.json
 !data/.gitkeep
 
 # Neo4j / MySQL local volumes
