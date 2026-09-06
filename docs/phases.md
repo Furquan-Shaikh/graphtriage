@@ -38,7 +38,7 @@ If the goal is to get a **working, hosted prototype ready for the mentor** quick
 | Day 3 | Knowledge graph construction | Phase 2 | Populated Neo4j graph | ✅ Done |
 | Day 4 | Embeddings + baseline model | Phase 3 + Phase 4 | Embeddings ready, baseline metrics recorded | ✅ Done |
 | Day 5 | GNN model | Phase 5 (lightweight version — no full hyperparameter search) | Trained GNN, compared to baseline | ✅ Done |
-| Day 6 | Explainability | Phase 6 (simplified version) | Explanation module returning readable output | |
+| Day 6 | Explainability | Phase 6 (simplified version) | Explanation module returning readable output | ✅ Done |
 | Day 7 | Backend integration (API) | Phase 7 | End-to-end API working locally | |
 | Day 8 | Dashboard | Phase 8 | Working local demo UI | |
 | Day 9 | Dockerize + full local test | Phase 7 (hardening/testing tasks) | Fully working local system via Docker Compose | |
@@ -147,19 +147,19 @@ If the goal is to get a **working, hosted prototype ready for the mentor** quick
 
 ---
 
-## Phase 6 — Explainability Layer (Weeks 19–20) — *Sprint: Day 6 (simplified version)*
+## Phase 6 — Explainability Layer (Weeks 19–20) — *Sprint: Day 6 (simplified version)* — ✅ Complete
 
 **Goals:** Make predictions interpretable.
 
 **Tasks:**
-- [ ] Integrate SHAP for feature-level explanations.
-- [ ] Extract attention weights (if using GAT) for graph-path-level explanations.
-- [ ] Build a simple explanation formatting function (turns raw SHAP/attention output into a readable sentence + supporting graph path).
-- [ ] Do a small qualitative review: manually check 10–15 explanations for sensibility.
+- [x] Integrate SHAP for feature-level explanations. — `app/explainability/feature_explainer.py`, applied to the baseline classifier (see `docs/memory.md` decision log for rationale).
+- [x] Extract attention weights (if using GAT) for graph-path-level explanations. — Adapted: since Day 5 used GraphSAGE (no native attention), built `app/explainability/similarity_explainer.py` (k-NN graph similarity) instead — covers the same explanatory role.
+- [x] Build a simple explanation formatting function (turns raw SHAP/attention output into a readable sentence + supporting graph path). — `app/explainability/combined_explainer.py`.
+- [x] Do a small qualitative review: manually check 10–15 explanations for sensibility. — `training/review_explanations.py`, 15/15 correct predictions, 100% neighbor-category agreement.
 
-**Deliverables:** Working explainability module integrated with the prediction pipeline.
+**Deliverables:** Working explainability module integrated with the prediction pipeline. — ✅ `CombinedExplainer`, tested end-to-end against real data.
 
-**Exit Criteria:** Every prediction can be paired with a human-readable explanation.
+**Exit Criteria:** Every prediction can be paired with a human-readable explanation. — ✅ Met; samples documented in `data/generated/explainability_samples.md`.
 
 ---
 

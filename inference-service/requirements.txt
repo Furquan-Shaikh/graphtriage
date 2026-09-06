@@ -16,3 +16,7 @@ mysql-connector-python==9.0.0
 
 # Added Day 5: GNN model
 torch_geometric>=2.5.0
+
+# Added Day 6: explainability
+shap>=0.45.0
+joblib>=1.4.0

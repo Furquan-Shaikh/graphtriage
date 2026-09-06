@@ -21,7 +21,7 @@ This is the **living memory** of the project — a running log of decisions, sta
 | Project Name | GraphTriage |
 | Domain | AIOps / Software Engineering + AI |
 | Core Idea | Knowledge-graph based explainable ticket triage and root-cause linking |
-| Current Phase | Phase 6 — Explainability Layer (see `phases.md`) — Phase 0-5 / Sprint Days 1-5 complete |
+| Current Phase | Phase 7 — Backend Integration (see `phases.md`) — Phase 0-6 / Sprint Days 1-6 complete |
 | Target Outcome | Working prototype + thesis + paper submission to a Scopus/SCI-indexed venue |
 | Plagiarism Target | Below 30% on final report |
 
@@ -116,6 +116,33 @@ resolution_time_hours also depends partly on some text-derivable signal
 not required for the Day 1-10 build sprint itself.
 ```
 
+```
+### Decision: Explainability uses SHAP (on baseline model) + graph similarity,
+not GAT attention weights
+Date: Sprint Day 6
+Context: docs/design.md Section 3.3 originally envisioned attention-weight-based
+graph-path explanations, which requires a GAT (Graph Attention Network).
+Day 5 used GraphSAGE (no built-in attention) for simplicity/speed in the
+lightweight sprint.
+Decision: Built explainability from two components instead: (1) SHAP applied
+to the Day 4 baseline TF-IDF+LogisticRegression classifier, for word-level
+contribution explanations; (2) a k-NN similarity-based explainer reusing the
+Day 5 embedding space, for "similar past tickets" graph-style explanations.
+Both are combined into one JSON-shaped output matching design.md's original
+intent.
+Rationale: SHAP does not apply cleanly to a GNN's message-passing node
+features (they're entangled with neighbors' features), so using it on the
+baseline's clean bag-of-words features gives a genuinely correct, not
+approximated, word-level explanation. The similarity explainer covers the
+structural/relational explanation GAT attention would have provided, and
+additionally works for brand-new tickets (not just ones already in the
+graph), which plain GAT attention would not support as directly.
+Alternatives Considered: Switching the Day 5 model from GraphSAGE to GAT to
+get native attention weights - deferred as unnecessary extra complexity for
+the lightweight sprint, since the SHAP + similarity combination already
+satisfies the "explain every prediction" requirement (prd.md FR-7) without
+it.
+```
 
 ```
 ### Decision: Changed MySQL host port from 3306 to 3307 in docker-compose.yml
@@ -169,6 +196,7 @@ ticket ID belongs to.
 | Sprint Day 3 | Knowledge graph built in Neo4j: constraints/indexes applied, Service/Ticket/Bug/Fix nodes synced from MySQL via `graph-etl/sync_to_graph.py`, validated (all MySQL-vs-Neo4j counts matched: 5 services, 1200 tickets/bugs/fixes, 1200 of each relationship type), and visually confirmed in Neo4j Browser |
 | Sprint Day 4 | Sentence-BERT embeddings generated for all 1200 tickets (384-dim, confirmed meaningful via within/across-category similarity gap of +0.33 on real data); baseline classifier (TF-IDF + LogReg) trained — 100% accuracy (dataset-limitation caveat logged in Section 3); baseline resolution-time estimator (category-average) trained — test MAE 1.25h, the number Day 5's GNN must beat; both consolidated into `data/generated/baseline_report.md` |
 | Sprint Day 5 | GraphSAGE GNN built (k-NN similarity graph from embeddings + multi-task classification/regression heads), trained with early stopping; test results: 100% accuracy (same dataset-ceiling caveat as baseline), resolution-time MAE 1.2984h — did not beat the 1.25h baseline (explainable dataset-noise-model finding, logged in Section 3); full comparison + honest discussion consolidated into `data/generated/gnn_vs_baseline_report.md` |
+| Sprint Day 6 | Explainability layer built: SHAP-based `FeatureExplainer` (keyword contributions, using the baseline classifier since SHAP doesn't apply directly to the GNN's message-passing features) + `SimilarityExplainer` (k-NN graph-based similar-ticket retrieval, works for both existing and brand-new tickets) + `CombinedExplainer` merging both into the design.md-specified output shape. Qualitative review on 15 test tickets: 15/15 correct predictions, 100% neighbor-category agreement. Samples documented in `data/generated/explainability_samples.md` |
 
 *(Append one line per significant milestone — e.g., "Phase 2 complete: knowledge graph populated with 1,200 tickets.")*
 
