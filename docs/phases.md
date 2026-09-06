@@ -36,8 +36,8 @@ If the goal is to get a **working, hosted prototype ready for the mentor** quick
 | Day 1 | Environment & repo setup | Phase 0 (setup part only; literature review deferred) | Repo live, containers running | ✅ Done |
 | Day 2 | Dataset creation | Phase 1 | Labeled synthetic dataset in MySQL | ✅ Done |
 | Day 3 | Knowledge graph construction | Phase 2 | Populated Neo4j graph | ✅ Done |
-| Day 4 | Embeddings + baseline model | Phase 3 + Phase 4 | Embeddings ready, baseline metrics recorded | |
-| Day 5 | GNN model | Phase 5 (lightweight version — no full hyperparameter search) | Trained GNN, compared to baseline | |
+| Day 4 | Embeddings + baseline model | Phase 3 + Phase 4 | Embeddings ready, baseline metrics recorded | ✅ Done |
+| Day 5 | GNN model | Phase 5 (lightweight version — no full hyperparameter search) | Trained GNN, compared to baseline | ✅ Done |
 | Day 6 | Explainability | Phase 6 (simplified version) | Explanation module returning readable output | |
 | Day 7 | Backend integration (API) | Phase 7 | End-to-end API working locally | |
 | Day 8 | Dashboard | Phase 8 | Working local demo UI | |
@@ -97,51 +97,53 @@ If the goal is to get a **working, hosted prototype ready for the mentor** quick
 
 ---
 
-## Phase 3 — NLP Embedding Pipeline (Weeks 10–11) — *Sprint: Day 4*
+## Phase 3 — NLP Embedding Pipeline (Weeks 10–11) — *Sprint: Day 4* — ✅ Complete
 
 **Goals:** Convert ticket text into usable vector representations.
 
 **Tasks:**
-- [ ] Set up Sentence-Transformers embedding pipeline.
-- [ ] Generate and store embeddings for all tickets.
-- [ ] Sanity-check embeddings (e.g., confirm semantically similar tickets have high cosine similarity).
+- [x] Set up Sentence-Transformers embedding pipeline. — `inference-service/app/embeddings/embedder.py`.
+- [x] Generate and store embeddings for all tickets. — `training/generate_embeddings.py` → `data/generated/embeddings.npz` (1200 × 384-dim).
+- [x] Sanity-check embeddings (e.g., confirm semantically similar tickets have high cosine similarity). — `training/sanity_check_embeddings.py`, within/across-category gap = +0.33 on real embeddings.
 
-**Deliverables:** Embedding generation module + stored embeddings for the dataset.
+**Deliverables:** Embedding generation module + stored embeddings for the dataset. — ✅ Done.
 
-**Exit Criteria:** Nearest-neighbor search on embeddings returns intuitively similar tickets for a handful of manual spot checks.
+**Exit Criteria:** Nearest-neighbor search on embeddings returns intuitively similar tickets for a handful of manual spot checks. — ✅ Met (example: Ticket #40 → nearest neighbor Ticket #964, same category, similarity 0.9965).
 
 ---
 
-## Phase 4 — Baseline Models (Weeks 12–13) — *Sprint: Day 4*
+## Phase 4 — Baseline Models (Weeks 12–13) — *Sprint: Day 4* — ✅ Complete
 
 **Goals:** Establish baseline performance to compare the GNN against later (required for a credible evaluation section).
 
 **Tasks:**
-- [ ] Train TF-IDF + Logistic Regression / Random Forest classifier for root-cause/service prediction.
-- [ ] Build a naive average-based (or simple regression) baseline for resolution-time estimation.
-- [ ] Record baseline metrics per `prd.md` Section 10.
+- [x] Train TF-IDF + Logistic Regression / Random Forest classifier for root-cause/service prediction. — `training/train_baseline_classifier.py`, 100% test accuracy (see caveat in `memory.md`).
+- [x] Build a naive average-based (or simple regression) baseline for resolution-time estimation. — `training/train_baseline_resolution_time.py`, test MAE 1.25h.
+- [x] Record baseline metrics per `prd.md` Section 10. — `training/build_baseline_report.py` → `data/generated/baseline_report.md`.
 
-**Deliverables:** Documented baseline results.
+**Deliverables:** Documented baseline results. — ✅ `data/generated/baseline_report.md`.
 
-**Exit Criteria:** Baseline metrics recorded and reproducible via a script.
+**Exit Criteria:** Baseline metrics recorded and reproducible via a script. — ✅ Met on Sprint Day 4.
 
 ---
 
-## Phase 5 — GNN Model Development (Weeks 14–18) — *Sprint: Day 5 (lightweight version)*
+## Phase 5 — GNN Model Development (Weeks 14–18) — *Sprint: Day 5 (lightweight version)* — ✅ Complete
 
 **Goals:** Build and train the core ML contribution of the project.
 
 **Tasks:**
-- [ ] Implement graph data loader (PyTorch Geometric `Data`/`HeteroData` objects from the Neo4j graph).
-- [ ] Implement GNN architecture (GraphSAGE or GAT) per `design.md`.
-- [ ] Train root-cause/service prediction head.
-- [ ] Train resolution-time regression head.
-- [ ] Tune hyperparameters (learning rate, number of layers, embedding dimension).
-- [ ] Compare against Phase 4 baselines.
+- [x] Implement graph data loader (PyTorch Geometric `Data`/`HeteroData` objects from the Neo4j graph). — `training/build_graph_dataset.py` (k-NN similarity edges from Day 4 embeddings, per docs/memory.md decision log).
+- [x] Implement GNN architecture (GraphSAGE or GAT) per `design.md`. — `app/gnn_model/model.py`, 2-layer GraphSAGE with multi-task heads.
+- [x] Train root-cause/service prediction head. — `training/train_gnn.py`.
+- [x] Train resolution-time regression head. — same script, combined multi-task loss.
+- [ ] Tune hyperparameters (learning rate, number of layers, embedding dimension). — Deliberately skipped for the lightweight sprint version (per `phases.md` sprint scope note); revisit before Phase 9 if time allows.
+- [x] Compare against Phase 4 baselines. — `training/build_final_comparison_report.py` → `data/generated/gnn_vs_baseline_report.md`.
 
-**Deliverables:** Trained GNN model with documented performance improvement over baseline.
+**Deliverables:** Trained GNN model with documented performance improvement over baseline. — ✅ Trained model saved (`gnn_model.pt`); performance is documented, though it does not show an improvement over baseline (see Exit Criteria).
 
-**Exit Criteria:** GNN outperforms baseline on the target metrics (or, if not, a clearly documented and honestly discussed analysis of why — still valid for a thesis if the investigation is rigorous).
+**Exit Criteria:** GNN outperforms baseline on the target metrics (or, if not, a clearly documented and honestly discussed analysis of why — still valid for a thesis if the investigation is rigorous). — ✅ Met via the honest-analysis path: GNN matched baseline on classification (both saturated at 100%, a known dataset-template limitation) and did not beat baseline on resolution-time MAE (1.2984h vs. 1.25h), with a clear, documented explanation (near-Bayes-optimal category-average under the dataset's independent per-category noise model — see `docs/memory.md` Sprint Day 5 entry).
+
+---
 
 ---
 

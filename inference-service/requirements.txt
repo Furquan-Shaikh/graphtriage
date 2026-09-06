@@ -4,6 +4,15 @@
 # would slow down your very first docker build for no benefit yet.
 fastapi==0.111.0
 uvicorn[standard]==0.30.1
-pydantic==2.7.4
+pydantic>=2.7.4
 python-dotenv==1.0.1
 neo4j==5.21.0
+
+# Added Day 4: embeddings + baseline models
+sentence-transformers==3.0.1
+numpy>=1.26.4
+scikit-learn>=1.5.2
+mysql-connector-python==9.0.0
+
+# Added Day 5: GNN model
+torch_geometric>=2.5.0

@@ -21,7 +21,7 @@ This is the **living memory** of the project — a running log of decisions, sta
 | Project Name | GraphTriage |
 | Domain | AIOps / Software Engineering + AI |
 | Core Idea | Knowledge-graph based explainable ticket triage and root-cause linking |
-| Current Phase | Phase 3 — NLP Embedding Pipeline (see `phases.md`) — Phase 0, 1 & 2 / Sprint Days 1-3 complete |
+| Current Phase | Phase 6 — Explainability Layer (see `phases.md`) — Phase 0-5 / Sprint Days 1-5 complete |
 | Target Outcome | Working prototype + thesis + paper submission to a Scopus/SCI-indexed venue |
 | Plagiarism Target | Below 30% on final report |
 
@@ -59,6 +59,63 @@ Alternatives Considered: SecuGuard (strong niche but narrower scope), SelfHeal-R
 ```
 
 *(Add new decision entries below this line as the project proceeds — e.g., dataset choice, GNN architecture choice, any scope change.)*
+
+```
+### Observation: TF-IDF + Logistic Regression baseline achieves 100% accuracy
+on root-cause classification
+Date: Sprint Day 4
+Context: While training the required baseline classifier (docs/phases.md
+Phase 4), the TF-IDF + Logistic Regression model scored 100% accuracy and
+100% macro-F1 on both the validation and test splits for root-cause category
+prediction.
+Root Cause: generate.py (Day 2) uses category-specific text templates with
+largely non-overlapping vocabulary (e.g. only "deadlock" tickets mention
+"circular wait"/"thread deadlock"; only "null-pointer-exception" tickets
+mention "NullPointerException"). This makes the categories trivially
+separable by keyword presence alone.
+Implication: The root-cause classification task cannot meaningfully
+demonstrate the GNN model's (Day 5) value over the baseline on this dataset,
+since there is no accuracy headroom left. This is a genuine limitation of
+the synthetic dataset and must be disclosed plainly in the thesis/paper
+(Limitations section), not hidden.
+Mitigation / Path Forward: The resolution-time regression baseline (Step 4,
+same day) is NOT affected by this issue, since resolution_time_hours is
+sampled with continuous random noise per ticket even within a category
+(see generate.py). The primary "baseline vs. GNN" comparison story for the
+paper will center on resolution-time prediction (MAE) and on the
+graph-based explainability/similarity-retrieval contributions, rather than
+on root-cause classification accuracy.
+Alternatives Considered: Regenerating the Day 2 dataset with noisier,
+less template-distinctive text (e.g. shared vocabulary/paraphrased
+templates across categories) — deferred rather than done immediately, to
+avoid re-doing completed Day 2/3 work mid-sprint; worth revisiting if time
+allows before the final evaluation phase (Phase 9).
+```
+
+```
+### Observation: Resolution-time GNN may not beat the category-average baseline
+Date: Sprint Day 5
+Context: In an initial GNN training run, test MAE (1.2593h, on synthetic
+test embeddings) came out slightly worse than the Day 4 category-average
+baseline (1.25h) - a -0.7% "improvement".
+Root Cause: generate.py (Day 2) samples resolution_time_hours independently
+and uniformly per category (random.uniform(rlo, rhi)), with no dependency
+on ticket text content beyond category. This makes the category-average a
+near-Bayes-optimal predictor for MAE under this specific data-generating
+process - there is little to no additional signal left for any model
+(GNN included) to exploit.
+Implication: If the real-embeddings GNN run (on the student's machine)
+also fails to clearly beat the baseline MAE, this is an honest, explainable
+property of the synthetic dataset design - not a bug - and should be
+discussed plainly in the thesis/paper's Limitations/Discussion section,
+alongside the Day 4 classification-saturation finding.
+Mitigation / Path Forward: If a clearer "GNN beats baseline" story is
+needed for publication strength, consider enriching generate.py (Day 2) so
+resolution_time_hours also depends partly on some text-derivable signal
+(e.g. severity keywords, detail magnitude) before Phase 9 (Evaluation) -
+not required for the Day 1-10 build sprint itself.
+```
+
 
 ```
 ### Decision: Changed MySQL host port from 3306 to 3307 in docker-compose.yml
@@ -110,6 +167,8 @@ ticket ID belongs to.
 | Sprint Day 1 | Repo scaffolded and pushed to GitHub; Docker Compose stack (MySQL, Neo4j, ticketing-service, inference-service) verified healthy end-to-end after fixing a MySQL host-port conflict (see Section 3) |
 | Sprint Day 2 | Synthetic dataset generated (1200 tickets, 5 services, 13 root-cause categories), stratified 70/15/15 train/val/test split, loaded into MySQL (with new `dataset_split` column, see Section 3), and documented via `data/generated/dataset_report.md` |
 | Sprint Day 3 | Knowledge graph built in Neo4j: constraints/indexes applied, Service/Ticket/Bug/Fix nodes synced from MySQL via `graph-etl/sync_to_graph.py`, validated (all MySQL-vs-Neo4j counts matched: 5 services, 1200 tickets/bugs/fixes, 1200 of each relationship type), and visually confirmed in Neo4j Browser |
+| Sprint Day 4 | Sentence-BERT embeddings generated for all 1200 tickets (384-dim, confirmed meaningful via within/across-category similarity gap of +0.33 on real data); baseline classifier (TF-IDF + LogReg) trained — 100% accuracy (dataset-limitation caveat logged in Section 3); baseline resolution-time estimator (category-average) trained — test MAE 1.25h, the number Day 5's GNN must beat; both consolidated into `data/generated/baseline_report.md` |
+| Sprint Day 5 | GraphSAGE GNN built (k-NN similarity graph from embeddings + multi-task classification/regression heads), trained with early stopping; test results: 100% accuracy (same dataset-ceiling caveat as baseline), resolution-time MAE 1.2984h — did not beat the 1.25h baseline (explainable dataset-noise-model finding, logged in Section 3); full comparison + honest discussion consolidated into `data/generated/gnn_vs_baseline_report.md` |
 
 *(Append one line per significant milestone — e.g., "Phase 2 complete: knowledge graph populated with 1,200 tickets.")*
 
