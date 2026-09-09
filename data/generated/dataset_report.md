@@ -1,6 +1,6 @@
 # Dataset Report — GraphTriage Synthetic Dataset
 
-_Generated: 2026-09-05T07:29:51.978168+00:00_
+_Generated: 2026-09-07T19:47:47.314866+00:00_
 
 **Total tickets loaded:** 1200
 
@@ -19,8 +19,8 @@ _Generated: 2026-09-05T07:29:51.978168+00:00_
 | search-service | 254 |
 | notification-service | 250 |
 | payment-service | 236 |
-| auth-service | 230 |
 | order-service | 230 |
+| auth-service | 230 |
 
 ## Tickets per Root-Cause Category
 

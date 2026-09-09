@@ -1,6 +1,6 @@
 # GNN vs. Baseline — Final Comparison Report — GraphTriage
 
-_Generated: 2026-09-06T07:16:43.288758+00:00_
+_Generated: 2026-09-07T19:50:46.069183+00:00_
 
 ## 1. Summary Table
 | Metric | Baseline | GraphSAGE GNN | Delta |

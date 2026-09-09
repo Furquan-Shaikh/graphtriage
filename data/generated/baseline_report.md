@@ -1,6 +1,6 @@
 # Baseline Model Report — GraphTriage
 
-_Generated: 2026-09-06T02:18:04.882583+00:00_
+_Generated: 2026-09-07T19:50:07.167634+00:00_
 
 These are the baseline results that Day 5's Graph Neural Network model must be compared against. Per `docs/prd.md` Section 10 and `docs/phases.md` Phase 4, a paper without a documented baseline comparison is very hard to publish — this file is that documentation.
 
