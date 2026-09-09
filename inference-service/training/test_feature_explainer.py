@@ -6,18 +6,20 @@ tickets, and verifies save/load works correctly.
 
 Usage:
     cd inference-service/training
-    python3 test_feature_explainer.py --mysql-port 3307
+    python test_feature_explainer.py --mysql-port 3307
 """
 
 import argparse
 import os
 import sys
 
+# Add parent directory to path so we can import app modules
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from dotenv import load_dotenv
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from app.explainability.feature_explainer import FeatureExplainer  # noqa: E402
-from train_baseline_classifier import fetch_split, get_mysql_connection  # noqa: E402
+from app.explainability.feature_explainer import FeatureExplainer
+from train_baseline_classifier import fetch_split, get_mysql_connection
 
 
 def load_env():
@@ -45,7 +47,7 @@ def main():
     explainer.fit(train_texts, train_labels)
 
     print("\n=== Explaining 3 sample test tickets ===")
-    for i in range(3):
+    for i in range(min(3, len(test_texts))):
         result = explainer.explain(test_texts[i])
         print(f"\nTicket text: {test_texts[i][:80]}...")
         print(f"True category: {test_labels[i]}")

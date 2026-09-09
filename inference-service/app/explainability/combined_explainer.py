@@ -3,24 +3,18 @@ GraphTriage — Combined Explanation Module (Day 6, Step 3)
 
 Merges FeatureExplainer (Step 1, SHAP keywords) and SimilarityExplainer
 (Step 2, graph-based similar tickets) into one clean explanation object,
-matching the output shape sketched in docs/design.md Section 3.3:
+matching the output shape sketched in docs/design.md Section 3.3.
 
-{
-  "top_contributing_features": [...],
-  "top_similar_past_tickets": [...],
-  "confidence": 0.83
-}
-
-This is the module the live API (Day 7 onward) will call for the
-`/explain` endpoint.
-
-Usage:
-    explainer = CombinedExplainer.load(
-        feature_path="feature_explainer.joblib",
-        similarity_path="similarity_explainer.joblib",
-    )
-    result = explainer.explain(text="...", ticket_id=482)          # existing ticket
-    result = explainer.explain(text="...", embedding=some_vector)  # brand-new ticket
+IMPORTANT: this module's "predicted_category" comes from the baseline
+classifier (via FeatureExplainer), NOT the Day 5 GNN. This is a deliberate,
+documented simplification (see docs/memory.md, Sprint Day 6 decision log) —
+SHAP applies cleanly to the baseline's bag-of-words features but not to the
+GNN's message-passing node features. As a consequence, /predict (GNN-based)
+and /explain (baseline-based) can occasionally disagree on the predicted
+category for the same ticket. That disagreement is real, useful signal —
+it should be surfaced, not hidden. The similar-past-tickets' categories
+returned here are their ACTUAL historical categories; they are never
+rewritten to artificially match the prediction.
 """
 
 from app.explainability.feature_explainer import FeatureExplainer
@@ -40,6 +34,7 @@ class CombinedExplainer:
                    (required if ticket_id is not provided)
         """
         feature_result = self.feature_explainer.explain(text)
+        predicted_category = feature_result["predicted_category"]
 
         if ticket_id is not None:
             similarity_result = self.similarity_explainer.explain_by_ticket_id(ticket_id)
@@ -48,15 +43,14 @@ class CombinedExplainer:
         else:
             raise ValueError("Must provide either ticket_id or embedding for the similarity explanation.")
 
-        # Estimate a simple confidence score from the classifier's own probability
-        # for its predicted class (a lightweight stand-in, not the GNN's confidence,
-        # matching this module's baseline-model-based feature explanation approach).
-        confidence = self.feature_explainer.classifier.predict_proba(
-            self.feature_explainer.vectorizer.transform([text])
-        ).max()
+        confidence = float(
+            self.feature_explainer.classifier.predict_proba(
+                self.feature_explainer.vectorizer.transform([text])
+            ).max()
+        )
 
         return {
-            "predicted_category": feature_result["predicted_category"],
+            "predicted_category": predicted_category,
             "top_contributing_features": [
                 f"{f['feature']} ({f['contribution']:+.3f})"
                 for f in feature_result["top_contributing_features"]
@@ -64,13 +58,13 @@ class CombinedExplainer:
             "top_similar_past_tickets": [
                 {
                     "ticket_id": n["ticket_id"],
-                    "category": n["category"],
+                    "category": n["category"],  # real historical category - never overridden
                     "resolution_time_hours": n["resolution_time_hours"],
                     "similarity": n["similarity"],
                 }
                 for n in similarity_result["similar_past_tickets"]
             ],
-            "confidence": round(float(confidence), 4),
+            "confidence": round(confidence, 4),
         }
 
     @classmethod

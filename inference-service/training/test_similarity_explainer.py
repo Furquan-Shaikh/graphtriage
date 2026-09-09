@@ -3,19 +3,21 @@ GraphTriage — Test the Similarity Explainer (Day 6, Step 2 verification)
 
 Usage:
     cd inference-service/training
-    python3 test_similarity_explainer.py --mysql-port 3307
+    python test_similarity_explainer.py --mysql-port 3307
 """
 
 import argparse
 import os
 import sys
 
+# Add parent directory to path so we can import app modules
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import numpy as np
 from dotenv import load_dotenv
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from app.explainability.similarity_explainer import SimilarityExplainer  # noqa: E402
-from build_graph_dataset import fetch_labels, get_mysql_connection  # noqa: E402
+from app.explainability.similarity_explainer import SimilarityExplainer
+from build_graph_dataset import fetch_labels, get_mysql_connection
 
 
 def load_env():
@@ -59,7 +61,7 @@ def main():
             f"resolution={neighbor['resolution_time_hours']}h | similarity={neighbor['similarity']}"
         )
 
-    # --- Mode 2: explain a "brand new" ticket (simulate with a slightly perturbed embedding) ---
+    # --- Mode 2: explain a "brand new" ticket ---
     fake_new_embedding = embeddings[10] + np.random.normal(0, 0.01, embeddings.shape[1])
     result2 = explainer.explain_by_embedding(fake_new_embedding, new_ticket_label="incoming_ticket_demo")
     print("\n=== Mode 2: Explain a brand-new (simulated) incoming ticket ===")

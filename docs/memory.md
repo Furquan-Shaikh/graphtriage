@@ -21,7 +21,7 @@ This is the **living memory** of the project — a running log of decisions, sta
 | Project Name | GraphTriage |
 | Domain | AIOps / Software Engineering + AI |
 | Core Idea | Knowledge-graph based explainable ticket triage and root-cause linking |
-| Current Phase | Phase 7 — Backend Integration (see `phases.md`) — Phase 0-6 / Sprint Days 1-6 complete |
+| Current Phase | Phase 8 — Dashboard & Demo (see `phases.md`) — Phase 0-7 / Sprint Days 1-7 complete |
 | Target Outcome | Working prototype + thesis + paper submission to a Scopus/SCI-indexed venue |
 | Plagiarism Target | Below 30% on final report |
 
@@ -145,6 +145,38 @@ it.
 ```
 
 ```
+### Lesson: scikit-learn model artifacts are version-sensitive; pinning
+requirements.txt alone is not enough
+Date: Sprint Day 7
+Context: During Docker integration, `/explain` failed with
+`AttributeError: 'LogisticRegression' object has no attribute 'multi_class'`.
+Root Cause: `feature_explainer.joblib` was pickled by a DIFFERENT
+scikit-learn version (1.9.0, on the local training machine) than the one
+installed in the inference-service container (1.7.2, per requirements.txt).
+Pinning a version in requirements.txt only affects newly-installed code —
+it does not retroactively fix already-serialized (pickled/joblib) model
+objects saved under a different version.
+Fix: Aligned scikit-learn to exactly 1.7.2 in BOTH the local training
+environment and requirements.txt, then regenerated feature_explainer.joblib
+and similarity_explainer.joblib under the matching version.
+Related Fixes (same debugging session):
+- Docker's default JDK HttpClient (used by Spring's RestClient) attempts an
+  HTTP/2 upgrade, which Uvicorn misreads as a WebSocket upgrade attempt,
+  causing POST bodies to arrive empty (422 "Field required: body"). Fixed
+  by using `SimpleClientHttpRequestFactory` (plain HTTP/1.1) instead, via a
+  dedicated `RestClientConfig` bean.
+- An earlier, incorrect fix in combined_explainer.py overrode each similar
+  past ticket's category to always match the current prediction. This was
+  reverted — similar tickets must show their REAL historical category, even
+  when it differs from the current prediction; that disagreement is
+  legitimate signal, not something to hide.
+Broader Takeaway for the paper: reproducibility of ML artifacts requires
+pinning the exact library version used for BOTH training/serialization and
+serving, not just the serving side — worth a line in the Methodology
+section on environment reproducibility.
+```
+
+```
 ### Decision: Changed MySQL host port from 3306 to 3307 in docker-compose.yml
 Date: Sprint Day 1
 Context: On first `docker compose up`, the MySQL container failed to start with a
@@ -197,6 +229,7 @@ ticket ID belongs to.
 | Sprint Day 4 | Sentence-BERT embeddings generated for all 1200 tickets (384-dim, confirmed meaningful via within/across-category similarity gap of +0.33 on real data); baseline classifier (TF-IDF + LogReg) trained — 100% accuracy (dataset-limitation caveat logged in Section 3); baseline resolution-time estimator (category-average) trained — test MAE 1.25h, the number Day 5's GNN must beat; both consolidated into `data/generated/baseline_report.md` |
 | Sprint Day 5 | GraphSAGE GNN built (k-NN similarity graph from embeddings + multi-task classification/regression heads), trained with early stopping; test results: 100% accuracy (same dataset-ceiling caveat as baseline), resolution-time MAE 1.2984h — did not beat the 1.25h baseline (explainable dataset-noise-model finding, logged in Section 3); full comparison + honest discussion consolidated into `data/generated/gnn_vs_baseline_report.md` |
 | Sprint Day 6 | Explainability layer built: SHAP-based `FeatureExplainer` (keyword contributions, using the baseline classifier since SHAP doesn't apply directly to the GNN's message-passing features) + `SimilarityExplainer` (k-NN graph-based similar-ticket retrieval, works for both existing and brand-new tickets) + `CombinedExplainer` merging both into the design.md-specified output shape. Qualitative review on 15 test tickets: 15/15 correct predictions, 100% neighbor-category agreement. Samples documented in `data/generated/explainability_samples.md` |
+| Sprint Day 7 | Full backend integration completed: FastAPI `/predict` (inductive GNN inference for new tickets via k-NN subgraph construction), `/similar`, `/explain` endpoints built and load models once at startup; Spring Boot JPA layer added (6 entities, 6 repositories, 3 DTOs) plus `TicketController` (CRUD + predict/similar/explain endpoints) and `InferenceClientService`/`RestClientConfig` calling the inference-service internally. JWT authentication implemented (`JwtService`, `JwtAuthFilter`, `/api/auth/login`), replacing the Day 1 permissive SecurityConfig — verified end-to-end (unauthenticated requests blocked, valid JWT succeeds). Extensive Docker integration debugging resolved: MySQL port conflict, CPU-only PyTorch install, `GRAPHTRIAGE_DATA_DIR` volume mount for trained artifacts, HTTP/1.1-forced RestClient (Uvicorn misread the JDK HttpClient's HTTP/2 upgrade attempt), and a scikit-learn version mismatch between training and serving environments (fixed by pinning `scikit-learn==1.7.2` everywhere and regenerating the `.joblib` artifacts). A flawed intermediate fix that overrode similar-tickets' categories to always match the prediction was caught and reverted — real historical categories are always shown, even when they disagree with the current prediction. Final verification: 10 held-out tickets checked against MySQL ground truth — 10/10 correct on both `/predict` and `/explain` |
 
 *(Append one line per significant milestone — e.g., "Phase 2 complete: knowledge graph populated with 1,200 tickets.")*
 

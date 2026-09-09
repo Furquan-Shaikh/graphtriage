@@ -11,7 +11,7 @@ neo4j==5.21.0
 # Added Day 4: embeddings + baseline models
 sentence-transformers==3.0.1
 numpy>=1.26.4
-scikit-learn>=1.5.2
+scikit-learn==1.7.2
 mysql-connector-python==9.0.0
 
 # Added Day 5: GNN model
