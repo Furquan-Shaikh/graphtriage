@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GraphTriage — Ticket Triage Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<style>
+:root {
+  --bg: #101820;
+  --surface: #17212B;
+  --surface-raised: #1D2933;
+  --border: #2B3742;
+  --border-soft: #223038;
+  --text-primary: #EAF0F5;
+  --text-secondary: #8CA0B3;
+  --text-muted: #5B6B7A;
+  --accent: #45C7B8;
+  --accent-soft: rgba(69, 199, 184, 0.14);
+  --critical: #F2795C;
+  --high: #F2A93C;
+  --medium: #4FA8E0;
+  --low: #6FCF97;
+  --neutral: #8CA0B3;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+}
+
+* { box-sizing: border-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+html, body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.01em; }
+
+a { color: var(--accent); }
+
+button { font-family: var(--font-body); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Login ---------- */
+#login-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+#login-section svg.bg-graph {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.12;
+}
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 2.25rem;
+}
+.login-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.75rem;
+}
+.login-mark h1 { font-size: 1.25rem; margin: 0; font-weight: 600; }
+.field { margin-bottom: 1.1rem; }
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+}
+.field input, .field select, .field textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 0.6rem 0.7rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.field-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; }
+.field-error { font-size: 0.75rem; color: var(--critical); margin-top: 0.35rem; display: none; }
+.field.has-error input, .field.has-error textarea { border-color: var(--critical); }
+.field.has-error .field-error { display: block; }
+
+.btn-solid {
+  background: var(--accent);
+  color: #08211D;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1.1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+.btn-solid:hover { filter: brightness(1.08); }
+.btn-solid:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-outline {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1.1rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.btn-outline:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+.btn-w-full { width: 100%; }
+.error-banner {
+  font-size: 0.85rem;
+  color: var(--critical);
+  margin-top: 0.9rem;
+  display: none;
+}
+
+/* ---------- App shell ---------- */
+#app-section { min-height: 100vh; }
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.topbar .brand { display: flex; align-items: center; gap: 0.6rem; }
+.topbar .brand h1 { font-size: 1.1rem; margin: 0; font-weight: 600; }
+.topbar .brand .tag { font-size: 0.75rem; color: var(--text-muted); margin-left: 0.5rem; }
+
+.dashboard-shell { max-width: 1320px; margin: 0 auto; padding: 1.75rem 2rem 3rem; }
+
+/* ---------- Stat strip ---------- */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--stat-color, var(--accent));
+  border-radius: var(--radius-sm);
+  padding: 1.1rem 1.25rem;
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.stat-label { color: var(--text-secondary); font-size: 0.82rem; margin-top: 0.35rem; }
+
+/* ---------- Charts ---------- */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+}
+.chart-card h2 { font-size: 0.95rem; font-weight: 600; margin: 0 0 0.9rem; }
+.chart-card .chart-wrap { height: 220px; position: relative; }
+.chart-empty { color: var(--text-muted); font-size: 0.85rem; padding: 2rem 0; text-align: center; }
+
+/* ---------- Main grid ---------- */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 1rem;
+  align-items: start;
+}
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.panel-header h2 { font-size: 1rem; font-weight: 600; margin: 0; }
+.panel-actions { display: flex; gap: 0.6rem; align-items: center; }
+#ticket-search {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 0.45rem 0.7rem;
+  font-size: 0.85rem;
+  width: 180px;
+}
+
+.ticket-list-body { max-height: 560px; overflow-y: auto; }
+.ticket-row {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border-soft);
+  cursor: pointer;
+}
+.ticket-row:hover { background: var(--surface-raised); }
+.ticket-row.active { background: var(--accent-soft); }
+.ticket-row .t-id { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); }
+.ticket-row .t-title { font-size: 0.9rem; font-weight: 500; }
+.ticket-row .t-service { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.15rem; }
+.empty-state, .loading-state {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.badge-critical { background: rgba(242,121,92,0.15); color: var(--critical); }
+.badge-high { background: rgba(242,169,60,0.15); color: var(--high); }
+.badge-medium { background: rgba(79,168,224,0.15); color: var(--medium); }
+.badge-low { background: rgba(111,207,151,0.15); color: var(--low); }
+.badge-neutral { background: rgba(139,160,179,0.15); color: var(--neutral); }
+
+/* ---------- Detail panel ---------- */
+.detail-panel-wrap { position: sticky; top: 1.75rem; }
+#ticket-detail {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.28);
+  animation: rise 0.25s ease;
+}
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+#detail-title { font-size: 1.15rem; font-weight: 600; margin: 0 0 0.5rem; }
+#detail-description { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+.detail-meta { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 0.9rem 0 1.1rem; }
+.detail-meta .meta-item { font-size: 0.78rem; color: var(--text-muted); }
+.detail-actions { display: flex; gap: 0.6rem; margin-bottom: 1.1rem; }
+.btn-sm { padding: 0.5rem 0.85rem; font-size: 0.82rem; }
+hr.divider { border: none; border-top: 1px solid var(--border); margin: 1.1rem 0; }
+
+.confidence-track {
+  height: 6px;
+  background: var(--surface-raised);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+.confidence-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.pred-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem; }
+.pred-row .k { color: var(--text-secondary); }
+.pred-row .v { font-weight: 600; }
+
+.keyword-badge {
+  display: inline-block;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  margin: 0 0.3rem 0.3rem 0;
+  font-size: 0.75rem;
+}
+.similar-ticket {
+  border-left: 2px solid var(--accent);
+  padding: 0.35rem 0 0.35rem 0.75rem;
+  margin-bottom: 0.45rem;
+  font-size: 0.85rem;
+}
+.similarity-tag {
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  margin-left: 0.4rem;
+}
+
+/* ---------- Modal (Create Ticket) ---------- */
+#createTicketModal .modal-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+#createTicketModal .modal-header { border-bottom: 1px solid var(--border); padding: 1.1rem 1.4rem; }
+#createTicketModal .modal-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; }
+#createTicketModal .modal-body { padding: 1.4rem; }
+#createTicketModal .modal-footer { border-top: 1px solid var(--border); padding: 1.1rem 1.4rem; }
+#createTicketModal .btn-close { filter: invert(1); opacity: 0.7; }
+.quality-tips {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.2rem;
+  line-height: 1.55;
+}
+.quality-tips strong { color: var(--text-primary); }
+.char-count { font-size: 0.72rem; color: var(--text-muted); text-align: right; margin-top: 0.3rem; }
+.char-count.ok { color: var(--low); }
+
+/* ---------- Toast ---------- */
+#toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--accent);
+  color: var(--text-primary);
+  padding: 0.75rem 1.1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+  z-index: 2000;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 960px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+  .main-grid { grid-template-columns: 1fr; }
+  .detail-panel-wrap { position: static; }
+}
+</style>
+</head>
+<body>
+
+<!-- ======== LOGIN SECTION ======== -->
+<div id="login-section">
+  <svg class="bg-graph" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+    <g stroke="#45C7B8" stroke-width="1">
+      <line x1="80" y1="90" x2="240" y2="180"/><line x1="240" y1="180" x2="180" y2="330"/>
+      <line x1="240" y1="180" x2="420" y2="120"/><line x1="420" y1="120" x2="560" y2="220"/>
+      <line x1="560" y1="220" x2="700" y2="150"/><line x1="180" y1="330" x2="360" y2="400"/>
+      <line x1="360" y1="400" x2="560" y2="220"/><line x1="360" y1="400" x2="520" y2="500"/>
+      <line x1="700" y1="150" x2="740" y2="320"/><line x1="520" y1="500" x2="700" y2="470"/>
+    </g>
+    <g fill="#45C7B8">
+      <circle cx="80" cy="90" r="5"/><circle cx="240" cy="180" r="5"/><circle cx="180" cy="330" r="5"/>
+      <circle cx="420" cy="120" r="5"/><circle cx="560" cy="220" r="5"/><circle cx="700" cy="150" r="5"/>
+      <circle cx="360" cy="400" r="5"/><circle cx="520" cy="500" r="5"/><circle cx="740" cy="320" r="5"/>
+      <circle cx="700" cy="470" r="5"/>
+    </g>
+  </svg>
+
+  <div class="login-card">
+    <div class="login-mark">
+      <svg width="26" height="26" viewBox="0 0 26 26"><g fill="none" stroke="#45C7B8" stroke-width="1.6"><line x1="6" y1="6" x2="19" y2="10"/><line x1="19" y1="10" x2="10" y2="20"/><line x1="6" y1="6" x2="10" y2="20"/></g><g fill="#45C7B8"><circle cx="6" cy="6" r="2.4"/><circle cx="19" cy="10" r="2.4"/><circle cx="10" cy="20" r="2.4"/></g></svg>
+      <h1>GraphTriage</h1>
+    </div>
+    <form id="login-form">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter username" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn-solid btn-w-full">Sign in</button>
+      <div id="login-error" class="error-banner"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ======== MAIN APP SECTION ======== -->
+<div id="app-section" style="display:none;">
+  <header class="topbar">
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 26 26"><g fill="none" stroke="#45C7B8" stroke-width="1.6"><line x1="6" y1="6" x2="19" y2="10"/><line x1="19" y1="10" x2="10" y2="20"/><line x1="6" y1="6" x2="10" y2="20"/></g><g fill="#45C7B8"><circle cx="6" cy="6" r="2.4"/><circle cx="19" cy="10" r="2.4"/><circle cx="10" cy="20" r="2.4"/></g></svg>
+      <h1>GraphTriage</h1>
+      <span class="tag">Ticket triage dashboard</span>
+    </div>
+    <button id="logout-btn" class="btn-outline btn-sm">Log out</button>
+  </header>
+
+  <main class="dashboard-shell">
+
+    <section class="stats-row">
+      <div class="stat-card" style="--stat-color:#45C7B8">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Total tickets</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#F2A93C">
+        <div class="stat-value" id="stat-open">0</div>
+        <div class="stat-label">Open</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#F2795C">
+        <div class="stat-value" id="stat-urgent">0</div>
+        <div class="stat-label">High + critical priority</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#4FA8E0">
+        <div class="stat-value" id="stat-services">0</div>
+        <div class="stat-label">Services tracked</div>
+      </div>
+    </section>
+
+    <section class="charts-row">
+      <div class="chart-card">
+        <h2>Tickets by status</h2>
+        <div class="chart-wrap"><canvas id="statusChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h2>Tickets by priority</h2>
+        <div class="chart-wrap"><canvas id="priorityChart"></canvas></div>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Tickets</h2>
+          <div class="panel-actions">
+            <input type="search" id="ticket-search" placeholder="Search title or service…" />
+            <button id="new-ticket-btn" class="btn-solid btn-sm" data-bs-toggle="modal" data-bs-target="#createTicketModal">+ New ticket</button>
+          </div>
+        </div>
+        <div class="ticket-list-body" id="ticket-list"></div>
+      </div>
+
+      <div class="detail-panel-wrap">
+        <div id="ticket-detail" style="display:none;">
+          <h4 id="detail-title"></h4>
+          <p id="detail-description"></p>
+          <div class="detail-meta">
+            <span class="meta-item">Service: <strong id="detail-service" style="color:var(--text-primary)"></strong></span>
+            <span id="detail-priority-badge"></span>
+            <span id="detail-status-badge"></span>
+          </div>
+          <div class="detail-actions">
+            <button id="fetch-predict-btn" class="btn-solid btn-sm">Get prediction</button>
+            <button id="fetch-explain-btn" class="btn-outline btn-sm">Get explanation</button>
+          </div>
+          <hr class="divider" />
+
+          <div id="prediction-panel" style="display:none;">
+            <h2 style="font-size:0.95rem;">Prediction</h2>
+            <div class="pred-row"><span class="k">Category</span><span class="v" id="pred-category"></span></div>
+            <div class="pred-row"><span class="k">Resolution time</span><span class="v"><span id="pred-resolution"></span> hrs</span></div>
+            <div class="pred-row"><span class="k">Confidence</span><span class="v" id="pred-confidence"></span></div>
+            <div class="confidence-track"><div class="confidence-fill" id="confidence-fill"></div></div>
+          </div>
+
+          <div id="explanation-panel" style="display:none; margin-top:1.1rem;">
+            <h2 style="font-size:0.95rem;">Explanation</h2>
+            <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.4rem;">Top contributing keywords</div>
+            <div id="explain-keywords" style="margin-bottom:0.9rem;"></div>
+            <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.4rem;">Similar past tickets</div>
+            <div id="explain-similar"></div>
+          </div>
+
+          <div id="error-message" style="color:var(--critical); font-size:0.85rem; margin-top:0.8rem; display:none;"></div>
+        </div>
+        <div id="no-ticket-selected" class="empty-state panel" style="border:1px solid var(--border);">
+          Select a ticket from the list to see its details, or create a new one.
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ======== CREATE TICKET MODAL ======== -->
+<div class="modal fade" id="createTicketModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New ticket</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="quality-tips">
+          <strong>For an accurate prediction:</strong> the model reads the title and description together, so be specific — describe the actual symptom or error message, not just "not working." Pick an existing service name if this is the same system as before; only add a new one if it truly is new.
+        </div>
+        <form id="create-ticket-form" novalidate>
+          <div class="field" id="field-title">
+            <label for="ticket-title">Title</label>
+            <input type="text" id="ticket-title" placeholder="e.g. Checkout page returns 500 on payment submit" />
+            <div class="field-error">Title should be at least 8 characters and describe the actual issue.</div>
+          </div>
+          <div class="field" id="field-description">
+            <label for="ticket-description">Description</label>
+            <textarea id="ticket-description" rows="4" placeholder="What happened, steps to reproduce, exact error text, when it started…"></textarea>
+            <div class="char-count" id="desc-count">0 / 30 minimum characters</div>
+            <div class="field-error">Description should be at least 30 characters — vague or empty descriptions hurt prediction quality.</div>
+          </div>
+          <div class="field" id="field-service">
+            <label for="ticket-service">Service</label>
+            <input type="text" id="ticket-service" list="service-options" placeholder="e.g. auth-service" />
+            <datalist id="service-options"></datalist>
+            <div class="field-hint">Reuses names already in the system where possible — this list is built from your existing tickets.</div>
+            <div class="field-error">Enter the service this ticket relates to.</div>
+          </div>
+          <div class="field" id="field-priority">
+            <label for="ticket-priority">Priority</label>
+            <select id="ticket-priority">
+              <option value="" selected disabled>Select priority</option>
+              <option value="LOW">Low — cosmetic or minor</option>
+              <option value="MEDIUM">Medium — partial impact</option>
+              <option value="HIGH">High — major feature broken</option>
+              <option value="CRITICAL">Critical — production down / data loss</option>
+            </select>
+            <div class="field-hint">If your backend uses different priority values, update these options to match.</div>
+            <div class="field-error">Select a priority level.</div>
+          </div>
+          <div id="create-ticket-error" class="error-banner"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="submit-ticket-btn" class="btn-solid btn-sm">Create ticket</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// ============================================================
+//  CONFIG
+// ============================================================
+const API_BASE = 'http://localhost:8080/api';
+let authToken = localStorage.getItem('jwt_token') || null;
+let currentTicketId = null;
+let allTickets = [];
+let statusChartInstance = null;
+let priorityChartInstance = null;
+
+// ============================================================
+//  HELPER: API calls with JWT
+// ============================================================
+async function apiCall(endpoint, options = {}) {
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(authToken ? { 'Authorization': 'Bearer ' + authToken } : {}),
+        ...options.headers
+    };
+    const response = await fetch(API_BASE + endpoint, { ...options, headers });
+    if (response.status === 401) {
+        logout();
+        throw new Error('Session expired. Please login again.');
+    }
+    return response;
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+// ============================================================
+//  LOGIN / LOGOUT
+// ============================================================
+function logout() {
+    localStorage.removeItem('jwt_token');
+    authToken = null;
+    document.getElementById('login-section').style.display = 'flex';
+    document.getElementById('app-section').style.display = 'none';
+    document.getElementById('ticket-detail').style.display = 'none';
+    document.getElementById('no-ticket-selected').style.display = 'block';
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('login-error');
+    errorDiv.style.display = 'none';
+
+    try {
+        const response = await fetch(API_BASE + '/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Login failed');
+        }
+        const data = await response.json();
+        authToken = data.token;
+        localStorage.setItem('jwt_token', authToken);
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('app-section').style.display = 'block';
+        loadTickets();
+    } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.style.display = 'block';
+    }
+});
+
+document.getElementById('logout-btn').addEventListener('click', logout);
+
+if (authToken) {
+    document.getElementById('login-section').style.display = 'none';
+    document.getElementById('app-section').style.display = 'block';
+    loadTickets();
+}
+
+// ============================================================
+//  COLOR / LABEL HELPERS (generic — adapts to whatever
+//  status/priority strings your backend actually returns)
+// ============================================================
+const PRIORITY_COLORS = { CRITICAL: '#F2795C', HIGH: '#F2A93C', MEDIUM: '#4FA8E0', LOW: '#6FCF97' };
+const STATUS_COLORS = { OPEN: '#F2A93C', IN_PROGRESS: '#4FA8E0', RESOLVED: '#6FCF97', CLOSED: '#8CA0B3' };
+const FALLBACK_PALETTE = ['#45C7B8', '#B085F5', '#F2A93C', '#4FA8E0', '#F2795C', '#6FCF97'];
+
+function colorFor(map, key) {
+    if (!key) return '#8CA0B3';
+    const norm = String(key).toUpperCase();
+    if (map[norm]) return map[norm];
+    let hash = 0;
+    for (let i = 0; i < norm.length; i++) hash = norm.charCodeAt(i) + ((hash << 5) - hash);
+    return FALLBACK_PALETTE[Math.abs(hash) % FALLBACK_PALETTE.length];
+}
+
+function priorityBadgeClass(priority) {
+    const norm = (priority || '').toUpperCase();
+    if (norm === 'CRITICAL') return 'badge-critical';
+    if (norm === 'HIGH') return 'badge-high';
+    if (norm === 'MEDIUM') return 'badge-medium';
+    if (norm === 'LOW') return 'badge-low';
+    return 'badge-neutral';
+}
+
+function statusBadgeClass(status) {
+    const norm = (status || '').toUpperCase();
+    if (norm === 'OPEN') return 'badge-high';
+    if (norm === 'IN_PROGRESS') return 'badge-medium';
+    if (norm === 'RESOLVED' || norm === 'CLOSED') return 'badge-low';
+    return 'badge-neutral';
+}
+
+// ============================================================
+//  LOAD TICKET LIST
+// ============================================================
+async function loadTickets() {
+    const listDiv = document.getElementById('ticket-list');
+    listDiv.innerHTML = '<div class="loading-state">Loading tickets…</div>';
+
+    // Fetching tickets is the only thing that should be able to blank out
+    // the ticket list on failure — nothing downstream of it should.
+    let tickets;
+    try {
+        const response = await apiCall('/tickets');
+        if (!response.ok) throw new Error('Failed to fetch tickets');
+        tickets = await response.json();
+    } catch (err) {
+        listDiv.innerHTML = `<div class="empty-state">Error: ${err.message}</div>`;
+        return;
+    }
+
+    allTickets = tickets || [];
+    renderTicketList(allTickets);
+    updateStats(allTickets);
+    updateServiceOptions(allTickets);
+
+    // Charts are a separate concern — if Chart.js failed to load or a
+    // chart call throws, show a friendly message in the chart cards only,
+    // don't let it take down the ticket list that already rendered fine.
+    try {
+        renderCharts(allTickets);
+    } catch (err) {
+        console.error('Chart rendering failed:', err);
+        document.querySelectorAll('.chart-wrap').forEach(el => {
+            el.innerHTML = '<div class="chart-empty">Charts unavailable — the charting library failed to load. Try refreshing the page.</div>';
+        });
+    }
+}
+
+function updateStats(tickets) {
+    const total = tickets.length;
+    const open = tickets.filter(t => (t.status || '').toUpperCase() === 'OPEN').length;
+    const urgent = tickets.filter(t => ['HIGH', 'CRITICAL'].includes((t.priority || '').toUpperCase())).length;
+    const services = new Set(tickets.map(t => t.serviceName).filter(Boolean)).size;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-open').textContent = open;
+    document.getElementById('stat-urgent').textContent = urgent;
+    document.getElementById('stat-services').textContent = services;
+}
+
+function updateServiceOptions(tickets) {
+    const datalist = document.getElementById('service-options');
+    const names = [...new Set(tickets.map(t => t.serviceName).filter(Boolean))];
+    datalist.innerHTML = names.map(n => `<option value="${n}"></option>`).join('');
+}
+
+function renderCharts(tickets) {
+    if (typeof Chart === 'undefined') {
+        throw new Error('Chart.js failed to load');
+    }
+    const statusCounts = {};
+    const priorityCounts = {};
+    tickets.forEach(t => {
+        const s = t.status || 'UNKNOWN';
+        const p = t.priority || 'UNKNOWN';
+        statusCounts[s] = (statusCounts[s] || 0) + 1;
+        priorityCounts[p] = (priorityCounts[p] || 0) + 1;
+    });
+
+    const statusLabels = Object.keys(statusCounts);
+    const priorityLabels = Object.keys(priorityCounts);
+
+    if (statusChartInstance) statusChartInstance.destroy();
+    if (priorityChartInstance) priorityChartInstance.destroy();
+
+    const statusCtx = document.getElementById('statusChart');
+    const priorityCtx = document.getElementById('priorityChart');
+
+    if (statusLabels.length === 0) {
+        statusCtx.parentElement.innerHTML = '<div class="chart-empty">No tickets yet — create one to see this chart.</div>';
+    } else {
+        statusChartInstance = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusLabels.map(l => statusCounts[l]),
+                    backgroundColor: statusLabels.map(l => colorFor(STATUS_COLORS, l)),
+                    borderColor: '#17212B',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#8CA0B3', boxWidth: 10, font: { size: 11 } } }
+                }
+            }
+        });
+    }
+
+    if (priorityLabels.length === 0) {
+        priorityCtx.parentElement.innerHTML = '<div class="chart-empty">No tickets yet — create one to see this chart.</div>';
+    } else {
+        priorityChartInstance = new Chart(priorityCtx, {
+            type: 'bar',
+            data: {
+                labels: priorityLabels,
+                datasets: [{
+                    data: priorityLabels.map(l => priorityCounts[l]),
+                    backgroundColor: priorityLabels.map(l => colorFor(PRIORITY_COLORS, l)),
+                    borderRadius: 4,
+                    maxBarThickness: 36
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#8CA0B3', font: { size: 11 } }, grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { color: '#8CA0B3', stepSize: 1, font: { size: 11 } }, grid: { color: '#2B3742' } }
+                }
+            }
+        });
+    }
+}
+
+function renderTicketList(tickets) {
+    const listDiv = document.getElementById('ticket-list');
+    if (!tickets || tickets.length === 0) {
+        listDiv.innerHTML = '<div class="empty-state">No tickets found. Create your first one with "+ New ticket".</div>';
+        return;
+    }
+    let html = '';
+    tickets.forEach(t => {
+        html += `<div class="ticket-row" data-id="${t.id}">
+                    <span class="t-id">#${t.id}</span>
+                    <div>
+                        <div class="t-title">${t.title}</div>
+                        <div class="t-service">${t.serviceName || 'No service'}</div>
+                    </div>
+                    <span class="badge ${priorityBadgeClass(t.priority)}">${t.priority || '—'}</span>
+                 </div>`;
+    });
+    listDiv.innerHTML = html;
+
+    document.querySelectorAll('.ticket-row').forEach(row => {
+        row.addEventListener('click', () => {
+            document.querySelectorAll('.ticket-row').forEach(r => r.classList.remove('active'));
+            row.classList.add('active');
+            const id = parseInt(row.dataset.id);
+            showTicketDetail(id);
+        });
+    });
+}
+
+document.getElementById('ticket-search').addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    const filtered = !q ? allTickets : allTickets.filter(t =>
+        (t.title || '').toLowerCase().includes(q) || (t.serviceName || '').toLowerCase().includes(q)
+    );
+    renderTicketList(filtered);
+});
+
+// ============================================================
+//  SHOW TICKET DETAIL
+// ============================================================
+async function showTicketDetail(id) {
+    currentTicketId = id;
+    document.getElementById('no-ticket-selected').style.display = 'none';
+    document.getElementById('ticket-detail').style.display = 'block';
+    document.getElementById('prediction-panel').style.display = 'none';
+    document.getElementById('explanation-panel').style.display = 'none';
+    document.getElementById('error-message').style.display = 'none';
+
+    try {
+        const response = await apiCall(`/tickets/${id}`);
+        if (!response.ok) throw new Error('Failed to fetch ticket details');
+        const ticket = await response.json();
+        document.getElementById('detail-title').textContent = ticket.title || '(no title)';
+        document.getElementById('detail-description').textContent = ticket.description || '(no description)';
+        document.getElementById('detail-service').textContent = ticket.serviceName || '-';
+        document.getElementById('detail-priority-badge').innerHTML =
+            `<span class="badge ${priorityBadgeClass(ticket.priority)}">${ticket.priority || 'No priority'}</span>`;
+        document.getElementById('detail-status-badge').innerHTML =
+            `<span class="badge ${statusBadgeClass(ticket.status)}">${ticket.status || 'No status'}</span>`;
+    } catch (err) {
+        document.getElementById('error-message').textContent = err.message;
+        document.getElementById('error-message').style.display = 'block';
+    }
+}
+
+// ============================================================
+//  FETCH PREDICTION
+// ============================================================
+document.getElementById('fetch-predict-btn').addEventListener('click', async () => {
+    if (!currentTicketId) return;
+    const panel = document.getElementById('prediction-panel');
+    panel.style.display = 'block';
+    document.getElementById('pred-category').textContent = 'Loading…';
+    document.getElementById('pred-resolution').textContent = '…';
+    document.getElementById('pred-confidence').textContent = '…';
+    document.getElementById('confidence-fill').style.width = '0%';
+
+    try {
+        const response = await apiCall(`/tickets/${currentTicketId}/predict`);
+        if (!response.ok) throw new Error('Prediction failed');
+        const data = await response.json();
+        document.getElementById('pred-category').textContent = data.predicted_category || 'unknown';
+        document.getElementById('pred-resolution').textContent = data.predicted_resolution_hours || '?';
+        const conf = data.confidence || 0;
+        document.getElementById('pred-confidence').textContent = (conf * 100).toFixed(1) + '%';
+        document.getElementById('confidence-fill').style.width = (conf * 100) + '%';
+    } catch (err) {
+        document.getElementById('pred-category').textContent = 'Error';
+        document.getElementById('error-message').textContent = err.message;
+        document.getElementById('error-message').style.display = 'block';
+    }
+});
+
+// ============================================================
+//  FETCH EXPLANATION
+// ============================================================
+document.getElementById('fetch-explain-btn').addEventListener('click', async () => {
+    if (!currentTicketId) return;
+    const panel = document.getElementById('explanation-panel');
+    panel.style.display = 'block';
+    document.getElementById('explain-keywords').textContent = 'Loading…';
+    document.getElementById('explain-similar').innerHTML = 'Loading…';
+
+    try {
+        const response = await apiCall(`/tickets/${currentTicketId}/explain`);
+        if (!response.ok) throw new Error('Explanation failed');
+        const data = await response.json();
+
+        const keywords = data.top_contributing_features || [];
+        document.getElementById('explain-keywords').innerHTML = keywords.map(k => `<span class="keyword-badge">${k}</span>`).join(' ') || 'None';
+
+        const similar = data.top_similar_past_tickets || [];
+        let html = '';
+        if (similar.length === 0) {
+            html = '<div class="empty-state" style="padding:1rem 0;">No similar tickets found.</div>';
+        } else {
+            similar.forEach(s => {
+                html += `<div class="similar-ticket">
+                            <strong>#${s.ticket_id}</strong> — ${s.category || 'unknown'}
+                            (${s.resolution_time_hours || '?'}h)
+                            <span class="similarity-tag">${(s.similarity * 100).toFixed(1)}%</span>
+                         </div>`;
+            });
+        }
+        document.getElementById('explain-similar').innerHTML = html;
+    } catch (err) {
+        document.getElementById('explain-keywords').textContent = 'Error';
+        document.getElementById('explain-similar').innerHTML = `<div style="color:var(--critical);">${err.message}</div>`;
+    }
+});
+
+// ============================================================
+//  CREATE TICKET
+// ============================================================
+const descInput = document.getElementById('ticket-description');
+const descCount = document.getElementById('desc-count');
+descInput.addEventListener('input', () => {
+    const len = descInput.value.trim().length;
+    descCount.textContent = `${len} / 30 minimum characters`;
+    descCount.classList.toggle('ok', len >= 30);
+});
+
+function clearFieldErrors() {
+    ['field-title', 'field-description', 'field-service', 'field-priority'].forEach(id => {
+        document.getElementById(id).classList.remove('has-error');
+    });
+    document.getElementById('create-ticket-error').style.display = 'none';
+}
+
+function validateTicketForm() {
+    let valid = true;
+    const title = document.getElementById('ticket-title').value.trim();
+    const description = document.getElementById('ticket-description').value.trim();
+    const service = document.getElementById('ticket-service').value.trim();
+    const priority = document.getElementById('ticket-priority').value;
+
+    if (title.length < 8) { document.getElementById('field-title').classList.add('has-error'); valid = false; }
+    if (description.length < 30) { document.getElementById('field-description').classList.add('has-error'); valid = false; }
+    if (service.length < 2) { document.getElementById('field-service').classList.add('has-error'); valid = false; }
+    if (!priority) { document.getElementById('field-priority').classList.add('has-error'); valid = false; }
+
+    return valid ? { title, description, serviceName: service, priority } : null;
+}
+
+document.getElementById('submit-ticket-btn').addEventListener('click', async () => {
+    clearFieldErrors();
+    const payload = validateTicketForm();
+    if (!payload) return;
+
+    const btn = document.getElementById('submit-ticket-btn');
+    btn.disabled = true;
+    btn.textContent = 'Creating…';
+
+    try {
+        const response = await apiCall('/tickets', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+            let msg = 'Failed to create ticket';
+            try { const err = await response.json(); msg = err.error || msg; } catch (_) {}
+            throw new Error(msg);
+        }
+
+        document.getElementById('create-ticket-form').reset();
+        descCount.textContent = '0 / 30 minimum characters';
+        descCount.classList.remove('ok');
+        const modalEl = document.getElementById('createTicketModal');
+        bootstrap.Modal.getInstance(modalEl)?.hide();
+        showToast('Ticket created');
+        loadTickets();
+    } catch (err) {
+        const errDiv = document.getElementById('create-ticket-error');
+        errDiv.textContent = err.message;
+        errDiv.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create ticket';
+    }
+});
+</script>
+</body>
+</html>

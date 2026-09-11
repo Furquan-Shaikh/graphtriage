@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /** Ticket CRUD + ML endpoints — matches design.md Section 4. */
@@ -32,6 +33,12 @@ public class TicketController {
     public ResponseEntity<TicketResponse> createTicket(@RequestBody TicketCreateRequest request) {
         TicketResponse response = ticketService.createTicket(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<TicketResponse>> listTickets() {
+        List<TicketResponse> responses = ticketService.listAllTickets();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")

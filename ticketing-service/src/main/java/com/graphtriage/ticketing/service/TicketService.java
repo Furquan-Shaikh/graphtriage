@@ -10,6 +10,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Business logic for ticket creation/retrieval, per rules.md Section 3.1
  * (controllers stay thin, delegate here).
@@ -31,10 +34,17 @@ public class TicketService {
                 .description(request.getDescription())
                 .service(service)
                 .priority(request.getPriority())
+                .status("OPEN") // FIX: explicit default so new tickets never save with status = null
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
         return toResponse(saved);
+    }
+
+    public List<TicketResponse> listAllTickets() {
+        return ticketRepository.findAll().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     public TicketResponse getTicket(Integer id) {

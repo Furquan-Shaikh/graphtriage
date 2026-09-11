@@ -1,6 +1,6 @@
 services:
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0.35
     container_name: graphtriage-mysql
     restart: unless-stopped
     environment:
