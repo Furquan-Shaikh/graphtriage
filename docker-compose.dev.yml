@@ -1,0 +1,12 @@
+services:
+  inference-service:
+    build:
+      context: ./inference-service
+    volumes:
+      - ./inference-service/app/explainability:/app/app/explainability
+  ticketing-service:
+    build:
+      context: ./ticketing-service
+  graph-seed:
+    build:
+      context: ./graph-etl

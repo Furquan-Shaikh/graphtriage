@@ -41,3 +41,9 @@ mysql-data/
 
 # Notebooks checkpoints
 notebooks/.ipynb_checkpoints/
+
+# Runtime model files needed by inference-service (small, shipped with repo)
+!data/generated/gnn_model.pt
+!data/generated/graph_dataset.pt
+!data/generated/feature_explainer.joblib
+!data/generated/similarity_explainer.joblib

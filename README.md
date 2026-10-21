@@ -1,5 +1,28 @@
 # GraphTriage
 
+## Quick Start (Docker, no setup)
+
+Only **Docker Desktop** is needed (on Windows, WSL2 must be enabled). No `.env`, no build, no database setup.
+
+```bash
+git clone https://github.com/Furquan-Shaikh/graphtriage.git
+cd graphtriage
+docker compose up
+```
+
+The first run downloads a few GB of images (about 2-5 minutes on a good connection). When the logs show `Graph seed finished.`, open:
+
+- App: http://localhost:8080 (login: `demo_user` / `ChangeMe123!`)
+- Knowledge graph (Neo4j Browser): http://localhost:7474 (login: `neo4j` / `demo_neo4j_pass`)
+
+Ports `8080`, `8000`, `3307`, `7474` and `7687` must be free. Images are built for `linux/amd64`.
+
+To stop: `docker compose down` (add `-v` to also wipe the data).
+
+Developers who want to build from source use:
+`docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build`
+
+
 Knowledge-Graph Based Explainable Ticket Triage and Root-Cause Linking System.
 M.Tech CSE Final Year Project — AIOps / Software Engineering + AI.
 
