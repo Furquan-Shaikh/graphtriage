@@ -587,7 +587,7 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 1.1rem 0
 // ============================================================
 //  CONFIG
 // ============================================================
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = (location.port === '5500') ? 'http://localhost:8080/api' : '/api';
 let authToken = localStorage.getItem('jwt_token') || null;
 let currentTicketId = null;
 let allTickets = [];
