@@ -15,7 +15,7 @@ function Warn($m) { Write-Host "[!!] $m" -ForegroundColor Yellow }
 function Done($code) { try { Stop-Transcript | Out-Null } catch {}; exit $code }
 function Fail($m) {
   Write-Host "[XX] $m" -ForegroundColor Red
-  Write-Host "Log file (send this to Furquan if you are stuck): $Log"
+  Write-Host "Log file (send this file to whoever shared the project with you if you are stuck): $Log"
   Done 1
 }
 function Refresh-Path {
@@ -182,7 +182,7 @@ while (-not $tok -and (Get-Date) -lt $deadline) {
     $tok = (Invoke-RestMethod -Method Post -Uri "$base/api/auth/login" -ContentType "application/json" -Body $body).token
   } catch { Start-Sleep -Seconds 5 }
 }
-if (-not $tok) { Fail "The app did not respond. Run 'docker compose logs ticketing-service' in $root and send the output to Furquan." }
+if (-not $tok) { Fail "The app did not respond. Run 'docker compose logs ticketing-service' in $root and send the output to whoever shared the project with you." }
 Ok "App is up and login works"
 
 Write-Host ""
