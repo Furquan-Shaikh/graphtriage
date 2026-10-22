@@ -62,6 +62,10 @@ The browser opens by itself. If it does not, open http://localhost:8080
 4. Open http://localhost:7474 (Neo4j). Log in with `neo4j` and `demo_neo4j_pass`.
 5. Type this in the top box and press the blue play button. You should see a graph:
 
+```
+MATCH (t:Ticket)-[:RAISED_ON]->(s:Service) RETURN t,s LIMIT 50
+```
+
 If a port was busy, the script chose another one and printed the correct addresses at the end. Use those.
 
 ---
