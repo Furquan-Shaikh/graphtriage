@@ -21,6 +21,8 @@ To stop: `docker compose down` (add `-v` to also wipe the data).
 
 Windows one-click setup (installs Docker if needed): see [SETUP_WINDOWS.md](SETUP_WINDOWS.md).
 
+Project owner: how to publish your changes is in [MAINTAINER_GUIDE.md](MAINTAINER_GUIDE.md).
+
 Developers who want to build from source use:
 `docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build`
 

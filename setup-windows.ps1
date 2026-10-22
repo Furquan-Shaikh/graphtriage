@@ -2,7 +2,10 @@
 # Run in PowerShell:  powershell -ExecutionPolicy Bypass -File .\setup-windows.ps1
 # Safe to run again at any time.
 
+param([switch]$Update, [switch]$Reset)
+
 $RepoZip    = "https://github.com/Furquan-Shaikh/graphtriage/archive/refs/heads/main.zip"
+if ($env:GT_REPO_ZIP) { $RepoZip = $env:GT_REPO_ZIP }
 $InstallDir = Join-Path $env:USERPROFILE "graphtriage"
 if ($env:GT_INSTALL_DIR) { $InstallDir = $env:GT_INSTALL_DIR }
 $Log = Join-Path $env:TEMP "graphtriage-setup.log"
@@ -96,7 +99,7 @@ $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 if ((Test-Path (Join-Path $scriptDir "docker-compose.yml")) -and (Test-Path (Join-Path $scriptDir "db-init"))) {
   $root = $scriptDir
   Ok "Using this folder: $root"
-} elseif (Test-Path (Join-Path $InstallDir "docker-compose.yml")) {
+} elseif ((Test-Path (Join-Path $InstallDir "docker-compose.yml")) -and -not $Update) {
   $root = $InstallDir
   Ok "Using existing folder: $root"
 } else {
@@ -109,12 +112,13 @@ if ((Test-Path (Join-Path $scriptDir "docker-compose.yml")) -and (Test-Path (Joi
   $inner = Get-ChildItem $tmp -Directory | Select-Object -First 1
   $parentDir = Split-Path $InstallDir -Parent
   if ($parentDir -and -not (Test-Path $parentDir)) { New-Item -ItemType Directory -Path $parentDir -Force | Out-Null }
-  Move-Item $inner.FullName $InstallDir
+  if (Test-Path $InstallDir) { Copy-Item (Join-Path $inner.FullName "*") $InstallDir -Recurse -Force } else { Move-Item $inner.FullName $InstallDir }
   Remove-Item $zip, $tmp -Recurse -Force -ErrorAction SilentlyContinue
   $root = $InstallDir
   Ok "Project downloaded to: $root"
 }
 Set-Location $root
+if ($Reset) { Warn "Reset requested: removing old containers AND data..."; docker compose down -v }
 
 # ---------- Step 4: already running? ports ----------
 Info "Step 4/6: Checking ports"
@@ -152,9 +156,9 @@ if ($running) {
 }
 
 # ---------- Step 5: start ----------
-if (-not $running) {
+if ((-not $running) -or $Update) {
   Info "Step 5/6: Starting GraphTriage. First run downloads about 3 GB - please wait (5-15 minutes)..."
-  docker compose up -d
+  if ($Update) { docker compose up -d --force-recreate } else { docker compose up -d }
   if ($LASTEXITCODE -ne 0) { Fail "'docker compose up' failed. Scroll up to see the error." }
   Info "Loading the knowledge graph (one-time)..."
   $deadline = (Get-Date).AddMinutes(10)

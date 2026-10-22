@@ -132,6 +132,23 @@ Same as Way 1, Step 4.
 
 ---
 
+## Update to the latest version
+
+When the project owner tells you there is an update, run these two lines in PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/Furquan-Shaikh/graphtriage/main/setup-windows.ps1 -OutFile setup-windows.ps1
+powershell -ExecutionPolicy Bypass -File .\setup-windows.ps1 -Update
+```
+
+If the owner says the data changed too, add -Reset at the end. This deletes your local data and loads the new data:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup-windows.ps1 -Update -Reset
+```
+
+---
+
 ## Everyday commands
 
 Run these in the project folder (for Way 1 it is `C:\Users\<your name>\graphtriage`).
