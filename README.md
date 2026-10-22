@@ -19,6 +19,8 @@ Ports `8080`, `8000`, `3307`, `7474` and `7687` must be free. Images are built f
 
 To stop: `docker compose down` (add `-v` to also wipe the data).
 
+Windows one-click setup (installs Docker if needed): see [FRIEND_SETUP.md](FRIEND_SETUP.md).
+
 Developers who want to build from source use:
 `docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build`
 
