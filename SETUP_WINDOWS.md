@@ -149,6 +149,7 @@ Run these in the project folder (for Way 1 it is `C:\Users\<your name>\graphtria
 - **Virtualization error**: see Way 2, Step 2.
 - **Port already in use (Way 2)**: close the program that uses ports 8080, 8000, 3307, 7474 or 7687, or use Way 1, which picks free ports automatically.
 - **Download keeps failing or is very slow**: turn off VPN or proxy and try again. The same command can be run again; it continues where it stopped.
+- **Setup fails with 'Unauthorized', or the app keeps restarting**: an older copy of the project left old data behind. In the project folder run `docker compose down -v` (this deletes the old data), then start again.
 - **The first start is slow**: it downloads about 3 GB. Later starts take under a minute.
 - **Still stuck?** Send the file `%TEMP%\graphtriage-setup.log` (Way 1) or the error text to whoever shared the project with you.
 

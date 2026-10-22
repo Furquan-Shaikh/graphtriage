@@ -164,7 +164,7 @@ if (-not $running) {
   } while ($st -notlike "exited*" -and (Get-Date) -lt $deadline)
   if ($st -ne "exited|0") {
     docker logs graphtriage-graph-seed 2>&1 | Select-Object -Last 15
-    Fail "The graph seed step did not finish correctly (status: $st)."
+    Fail "The graph seed step did not finish correctly (status: $st). If you ran GraphTriage before with different settings, run 'docker compose down -v' in the project folder (this deletes the old data), then run this script again."
   }
   Ok "Knowledge graph loaded"
 } else {
